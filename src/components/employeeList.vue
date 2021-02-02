@@ -36,7 +36,7 @@
               <td>{{ item.name }}</td>
               <td>{{ item.email }}</td>
               <td>{{ item.phone }}</td>
-              <td>{{ item.date_of_joining }}</td>
+              <td>{{ item.date_of_joining|formatDate}}</td>
               <td>
                 <router-link
                   :to="{

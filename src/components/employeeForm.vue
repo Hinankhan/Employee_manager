@@ -1,73 +1,85 @@
 <template>
   <b-container>
-    <ValidationObserver ref="observer">
-      <b-form
-        slot-scope="{ validate }"
-        @submit.prevent="validate().then(isEdit ? onUpdate() : onSubmit())"
-      >
-        <ValidationProvider rules="required" name="Name">
-          <b-form-group slot-scope="{ valid, errors }" label="Name">
-            <b-form-input
-              type="text"
-              v-model="enteredname"
-              :state="errors[0] ? false : valid ? true : null"
-              placeholder="Enter name"
-            >
-            </b-form-input>
-            <b-form-invalid-feedback>
-              {{ errors[0] }}
-            </b-form-invalid-feedback>
-          </b-form-group>
-        </ValidationProvider>
-
-        <ValidationProvider rules="required|email" name="Email">
-          <b-form-group slot-scope="{ valid, errors }" label="Email">
-            <b-form-input
-              type="email"
-              v-model="enteredEmail"
-              :state="errors[0] ? false : valid ? true : null"
-              placeholder="Enter email"
-            >
-            </b-form-input>
-            <b-form-invalid-feedback>
-              {{ errors[0] }}
-            </b-form-invalid-feedback>
-          </b-form-group>
-        </ValidationProvider>
-
-        <ValidationProvider rules="required" name="Mobile">
-          <b-form-group slot-scope="{ valid, errors }" label="Mobile">
-            <b-form-input
-              type="text"
-              v-model="enteredMobile"
-              :state="errors[0] ? false : valid ? true : null"
-              placeholder="Enter mobile no"
-            >
-            </b-form-input>
-            <b-form-invalid-feedback>
-              {{ errors[0] }}
-            </b-form-invalid-feedback>
-          </b-form-group>
-        </ValidationProvider>
-        <ValidationProvider rules="required" name="date">
-          <b-form-group slot-scope="{ valid, errors }" label="Date of joining">
-            <b-form-input
-              type="date"
-              v-model="enteredDate"
-              :state="errors[0] ? false : valid ? true : null"
-              placeholder="Enter Date"
-            >
-            </b-form-input>
-            <b-form-invalid-feedback>
-              {{ errors[0] }}
-            </b-form-invalid-feedback>
-          </b-form-group>
-        </ValidationProvider>
-        <b-button block type="submit" variant="primary">
-          {{ isEdit ? "Update Employee" : "Add Employee" }}</b-button
+    <form @submit.prevent="isEdit ? onUpdate() : onSubmit()">
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <ui-textbox
+            :class="{ error: errors.has('name') }"
+            v-validate="'required|alpha'"
+            name="name"
+            type="text"
+            floating-label
+            label="Name"
+            icon="person"
+            placeholder="Enter your name"
+            v-model="enteredname"
+          ></ui-textbox>
+          <span class="error" v-if="errors.has('name')">{{
+            errors.first("name")
+          }}</span>
+        </div>
+        <div class="form-group col-md-6">
+          <ui-textbox
+            :class="{ error: errors.has('email') }"
+            v-validate="'required|email'"
+            name="email"
+            type="text"
+            floating-label
+            label="Email"
+            icon="email"
+            placeholder="Enter your Email"
+            v-model="enteredEmail"
+          ></ui-textbox>
+          <span class="error" v-if="errors.has('email')">{{
+            errors.first("email")
+          }}</span>
+        </div>
+      </div>
+      <div class="form-row">
+         <div class="form-group col-md-6">
+         <ui-datepicker
+         :class="{ error: errors.has('date') }"
+            v-validate="'required'"
+            floating-label
+            icon="date_range"
+            class="material-icons"
+            label="Date of Joining"
+            placeholder="Select date of joining"
+            type="text"
+            name="date"
+            v-model="enteredDate"
+            :custom-formatter="pickerFormatter"
+            @close="OnDate()"
+          ></ui-datepicker>
+          <span class="error" v-if="errors.has('date')">{{
+            errors.first("date")
+          }}</span>
+        </div>
+        <div class="form-group col-md-6">
+          <ui-textbox
+            :class="{ error: errors.has('phone') }"
+            v-validate="'required|numeric'"
+            name="phone"
+            floating-label
+            icon="phone"
+            label="Phone number"
+            placeholder="Enter your phone number"
+            type="tel"
+            v-model="enteredMobile"
+          ></ui-textbox>
+          <span class="error" v-if="errors.has('phone')">{{
+            errors.first("phone")
+          }}</span>
+        </div>
+       
+      </div>
+      <div class="button">
+        <ui-button color="accent" size="normal">
+          {{ isEdit ? "Update Employee" : "Add Employee" }}</ui-button
         >
-      </b-form>
-    </ValidationObserver>
+      </div>
+    </form>
+   
   </b-container>
 </template>
 <script>
@@ -78,7 +90,7 @@ export default {
       enteredname: "",
       enteredEmail: "",
       enteredMobile: "",
-      enteredDate: "",
+      enteredDate:null,
     };
   },
   mounted() {
@@ -96,21 +108,37 @@ export default {
     }
   },
   methods: {
+    OnDate(){event.preventDefault()},
+    pickerFormatter(date) {
+      return date
+        .toLocaleDateString("ja", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        })
+        .replace(/\//g, "-");
+    },
+   
     onSubmit() {
+      console.log(this.enteredDate)
+      this.$validator.validateAll();
       if (
         this.enteredname === "" ||
         this.enteredEmail === "" ||
         this.enteredMobile === "" ||
-        this.enteredDate === ""
+        this.enteredDate === null
       ) {
         return "please enter the details";
       } else {
+        let test = this.enteredDate
+        // console.log('testing',test)
+        // let newEnteredDate = test.split("T")[0];
         const newEmployee = {
-          id: new Date().toISOString(),
+          id: Date.now(), //new Date().toISOString(),
           name: this.enteredname,
           email: this.enteredEmail,
           phone: this.enteredMobile,
-          date_of_joining: this.enteredDate,
+          date_of_joining:test,
         };
         //let newItems = new Array();
         let newItems;
@@ -147,7 +175,17 @@ export default {
 };
 </script>
 <style scoped>
-fieldset {
-  text-align: initial;
+.button {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+span.error {
+  color: #9f3a38;
+}
+.ui-button--type-primary.ui-button--color-accent {
+  width: 32%;
+  border-radius: 18px;
+  box-shadow: 8px 8px 10px #d1d1d1, -8px -8px 10px #ffffff;
 }
 </style>

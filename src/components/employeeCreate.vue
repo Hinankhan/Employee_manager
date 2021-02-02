@@ -4,8 +4,6 @@
      <ui-button
         color="accent"
         icon="keyboard_backspace"
-        :icon-position="iconPosition"
-        :size="size"
         type="secondary"
         @click="toHome"
         >Back to home</ui-button
